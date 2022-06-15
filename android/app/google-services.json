@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "369849117361",
+    "project_id": "wishlistku-2022",
+    "storage_bucket": "wishlistku-2022.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:369849117361:android:b93083ff9f19bef7add090",
+        "android_client_info": {
+          "package_name": "com.example.wishlistku"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "369849117361-tu0o7b4843r2n6dtbtsgc08n1adt66ao.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.wishlistku",
+            "certificate_hash": "4e87b286cde60b500e549ad8d3fcab8a9f2803ce"
+          }
+        },
+        {
+          "client_id": "369849117361-dj9or3vbkqs86nsp6q75c7n5qsv3engd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKy2gLo2NbrBRcj1STsgSse6H_91bdk7Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "369849117361-dj9or3vbkqs86nsp6q75c7n5qsv3engd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
