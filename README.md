@@ -1,6 +1,6 @@
 # wishlistku
 
-KELOMOK 7 DOA ORANG TUA <br /> Alex Adi Perdana (2031710005) <br />
+KELOMPOK 7 DOA ORANG TUA <br /> Alex Adi Perdana (2031710005) <br />
 Alifia Shofa' Nabilah (2031710027) <br /> Ratu Atikah Nurissobach (2031710145)
 
 ## Getting Started
