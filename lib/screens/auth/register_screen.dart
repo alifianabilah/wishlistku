@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:wishlistku/database/userDB.dart';
 import 'package:wishlistku/screens/auth/login_screen.dart';
-import 'package:wishlistku/screens/whitelist/ListWhiteList.dart';
 import 'package:wishlistku/values/bahasa.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -75,6 +74,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
               new Padding(
                 padding: EdgeInsets.all(dim.height * 0.02),
                 child: new TextFormField(
+                  obscureText: true,
+                  enableSuggestions: false,
+                  autocorrect: false,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return Bahasa.fieldKosong;

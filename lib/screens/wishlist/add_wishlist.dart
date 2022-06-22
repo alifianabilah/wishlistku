@@ -1,32 +1,42 @@
-// ignore_for_file: deprecated_member_use, prefer_const_constructors, duplicate_ignore, must_be_immutable, prefer_const_constructors_in_immutables
+// ignore_for_file: deprecated_member_use, prefer_const_constructors, duplicate_ignore, unnecessary_null_comparison, unrelated_type_equality_checks
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/instance_manager.dart';
+import 'package:google_geocoding/google_geocoding.dart';
+import 'package:google_place/google_place.dart' as googlePlace;
+import 'package:google_geocoding/google_geocoding.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:location/location.dart' as LocationManager;
 import 'package:wishlistku/database/kategoriDB.dart';
-import 'package:wishlistku/database/whitelistDB.dart';
+import 'package:wishlistku/database/wishlistDB.dart';
 import 'package:wishlistku/function.dart';
+import 'package:wishlistku/screens/auth/login_view_model.dart';
 import 'package:wishlistku/screens/kategori/KategoriIconScreen.dart';
 import 'package:wishlistku/values/bahasa.dart';
+
 import 'package:wishlistku/component/Widget.dart';
 
-class UpdateWhiteListScreen extends StatefulWidget {
-  final WhitelistAttrb item;
-
-  const UpdateWhiteListScreen({Key? key, required this.item}) : super(key: key);
+class AddWishListScreen extends StatefulWidget {
+  const AddWishListScreen({Key? key}) : super(key: key);
 
   @override
-  _UpdateWhiteListScreenState createState() => _UpdateWhiteListScreenState();
+  _AddWishListScreenState createState() => _AddWishListScreenState();
 }
 
-class _UpdateWhiteListScreenState extends State<UpdateWhiteListScreen> {
+class _AddWishListScreenState extends State<AddWishListScreen> {
+  CameraPosition _kInitialPosition =
+      CameraPosition(target: LatLng(-7.96598, 112.63418), zoom: 15);
+  final TextEditingController _etNamaItem = TextEditingController();
+  final TextEditingController _etDeskripsi = TextEditingController();
+  final TextEditingController _etPrice = TextEditingController();
+
   final FocusNode _focusName = FocusNode();
   final FocusNode _focusDesc = FocusNode();
   final FocusNode _focusPrice = FocusNode();
-
-  TextEditingController _etNamaItem = TextEditingController();
-  TextEditingController _etDeskripsi = TextEditingController();
-  TextEditingController _etPrice = TextEditingController();
 
   bool _autovalidateNama = false;
   bool _autovalidatePrice = false;
@@ -35,19 +45,76 @@ class _UpdateWhiteListScreenState extends State<UpdateWhiteListScreen> {
 
   final List<DropdownMenuItem> _listKategori = [];
   late int _valueKategori;
+  late double _latitude;
+  late double _longitude;
+  String _location = "";
 
   DateTime _chooseDate = DateTime.now();
+  GoogleMapController? mapController;
+  LatLng? _lastTap;
+  final List<Marker> _markers = [];
+  final LoginViewModel _viewModel = Get.put(LoginViewModel());
+
+  @override
+  void initState() {
+    getKategori();
+    setCurrentLocation();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    _etNamaItem = TextEditingController(text: widget.item.title);
-    _etDeskripsi = TextEditingController(text: widget.item.description);
-    _etPrice = TextEditingController(text: widget.item.price);
+    Size dim = MediaQuery.of(context).size;
+
+    GoogleMap googleMap = GoogleMap(
+      onMapCreated: onMapCreated,
+      gestureRecognizers: {
+        Factory<OneSequenceGestureRecognizer>(
+          () => EagerGestureRecognizer(),
+        ),
+      },
+      initialCameraPosition: _kInitialPosition,
+      markers: Set<Marker>.of(_markers),
+      onTap: (LatLng pos) {
+        _lastTap = pos;
+        if (_lastTap != null &&
+            _lastTap!.latitude != null &&
+            _lastTap!.longitude != null) {
+          setState(() {
+            _latitude = _lastTap?.latitude ?? 12.3;
+            _longitude = _lastTap?.longitude ?? 104.3;
+          });
+
+          setState(() {
+            LatLng latLng = LatLng(_lastTap!.latitude, _lastTap!.longitude);
+            _markers.clear();
+            _markers
+                .add(Marker(markerId: MarkerId('SomeId'), position: latLng));
+          });
+        }
+        setState(() {});
+      },
+    );
+
+    final List<Widget> columnChildren = <Widget>[
+      Padding(
+        padding: const EdgeInsets.only(
+            left: 10.0, top: 0, right: 10.0, bottom: 10.0),
+        child: Center(
+          child: SizedBox(
+            width: dim.width - 20,
+            height: dim.width - 20,
+            child: googleMap,
+          ),
+        ),
+      ),
+    ];
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
         elevation: 0,
-        title: Text(Bahasa.updateWhitelist),
+        title: Text(Bahasa.tambahWishlist),
       ),
       floatingActionButton: customFlatActionButton(context),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -61,7 +128,7 @@ class _UpdateWhiteListScreenState extends State<UpdateWhiteListScreen> {
               physics: const BouncingScrollPhysics(),
               children: <Widget>[
                 Image.asset(
-                  "assets/images/insert_whitelist.webp",
+                  "assets/images/insert_wishlist.webp",
                   width: MediaQuery.of(context).size.width - 200,
                   height: 200.0,
                   fit: BoxFit.fitHeight,
@@ -75,7 +142,7 @@ class _UpdateWhiteListScreenState extends State<UpdateWhiteListScreen> {
                       child: CustomTextField(
                         controller: _etNamaItem,
                         focusNode: _focusName,
-                        textInputAction: TextInputAction.none,
+                        textInputAction: TextInputAction.next,
                         autovalidate: _autovalidateNama,
                         label: Bahasa.namaItem,
                         validator: (val) {
@@ -92,7 +159,7 @@ class _UpdateWhiteListScreenState extends State<UpdateWhiteListScreen> {
                         },
                         maxLines: 1,
                         key: UniqueKey(),
-                        // icon: Icons.text_fields,
+                        icon: Icons.text_fields,
                         textInputType: TextInputType.text,
                       ),
                     ),
@@ -197,8 +264,16 @@ class _UpdateWhiteListScreenState extends State<UpdateWhiteListScreen> {
                   ),
                 ),
                 const SizedBox(
+                  height: 10.0,
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: columnChildren,
+                ),
+                const SizedBox(
                   height: 120.0,
-                )
+                ),
               ],
             ),
           ),
@@ -225,30 +300,57 @@ class _UpdateWhiteListScreenState extends State<UpdateWhiteListScreen> {
           ),
           fillColor: Theme.of(context).accentColor,
           onPressed: () async {
-            Whitelist dbWhitelist = await Whitelist.initDatabase();
+            // print("Allo");
+            Wishlist dbWishlist = await Wishlist.initDatabase();
             int? validPrice = int.tryParse(_etPrice.text);
             _formKey.currentState?.validate();
             if (validPrice == null) {
               return;
             }
-            WhitelistAttrb resp = await dbWhitelist.updateDataByValue(
-                widget.item.id,
-                title: _etNamaItem.text.trim(),
-                time: DateFormat(DateFormat.YEAR_MONTH_DAY)
-                    .format(_chooseDate)
-                    .toString(),
-                description: _etDeskripsi.text.trim(),
-                price: validPrice.toString(),
-                idKategori: _valueKategori);
-            // WhitelistAttrb resp = await dbWhitelist.insertDataByValue(
-            //     title: _etNamaItem.text.trim(),
-            //     time: DateFormat(DateFormat.YEAR_MONTH_DAY)
-            //         .format(_chooseDate)
-            //         .toString(),
-            //     description: _etDeskripsi.text.trim(),
-            //     price: validPrice.toString(),
-            //     idKategori: _valueKategori);
-            Navigator.pop(context, resp);
+            try {
+              dynamic user = _viewModel.getData();
+              if (user == null) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text("Anda belum login"),
+                  duration: Duration(seconds: 2),
+                ));
+                return;
+              }
+
+              await reverseGeocodingSearch(
+                  LatLon(_lastTap!.latitude, _lastTap!.longitude));
+              if (_lastTap!.latitude != null &&
+                  _lastTap!.longitude != null &&
+                  _location != "") {
+                WishlistAttrb resp = await dbWishlist.insertDataByValue(
+                    userId: user['id'].toString(),
+                    title: _etNamaItem.text.trim(),
+                    time: DateFormat(DateFormat.YEAR_MONTH_DAY)
+                        .format(_chooseDate)
+                        .toString(),
+                    description: _etDeskripsi.text.trim(),
+                    price: validPrice.toString(),
+                    lat: _latitude,
+                    lng: _longitude,
+                    location: _location,
+                    idKategori: _valueKategori);
+                Navigator.pop(context, resp);
+              } else {
+                // scafold popup
+
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content:
+                      Text("Tolong pilih lokasi terlebih dahulu:" + _location),
+                  duration: Duration(seconds: 2),
+                ));
+              }
+            } catch (e) {
+              print(e);
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text("Error : " + e.toString()),
+                duration: Duration(seconds: 2),
+              ));
+            }
           },
         ),
       ),
@@ -308,9 +410,67 @@ class _UpdateWhiteListScreenState extends State<UpdateWhiteListScreen> {
     setState(() {});
   }
 
-  @override
-  void initState() {
-    super.initState();
-    getKategori();
+  Future<void> onMapCreated(GoogleMapController controller) async {
+    setState(() {
+      mapController = controller;
+    });
+  }
+
+  Future<LocationManager.LocationData?> _currentLocation() async {
+    bool serviceEnabled;
+    LocationManager.PermissionStatus permissionGranted;
+
+    LocationManager.Location location = new LocationManager.Location();
+
+    serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
+        return null;
+      }
+    }
+
+    permissionGranted = (await location.hasPermission());
+    if (permissionGranted == LocationManager.PermissionStatus.denied) {
+      permissionGranted = (await location.requestPermission());
+      if (permissionGranted != LocationManager.PermissionStatus.granted) {
+        return null;
+      }
+    }
+    return await location.getLocation();
+  }
+
+  Future<void> reverseGeocodingSearch(LatLon latlng) async {
+    var googleGeocoding =
+        GoogleGeocoding("AIzaSyCOOOdZc3yZ7RzV8AAhTT3zciChxcXhbZI");
+    var response = await googleGeocoding.geocoding.getReverse(latlng);
+    if (response != null && response.results != null) {
+      dynamic res = response.results;
+      if (res.length < 1) {
+        setState(() {
+          _location = "Tidak ditemukan";
+        });
+      } else if (mounted) {
+        setState(() {
+          print(response.results);
+          _location = response.results!.first != null
+              ? (response.results!.first.formattedAddress ?? "Tidak ditemukan")
+              : "Tidak ditemukan";
+        });
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          _location = "Tidak ditemukan";
+        });
+      }
+    }
+  }
+
+  Future<void> setCurrentLocation() async {
+    dynamic location = await _currentLocation();
+    _kInitialPosition = CameraPosition(
+        target: LatLng(location.latitude, location.longitude), zoom: 11.0);
+    setState(() {});
   }
 }

@@ -1,41 +1,41 @@
 {
   "project_info": {
-    "project_number": "369849117361",
-    "project_id": "wishlistku-2022",
-    "storage_bucket": "wishlistku-2022.appspot.com"
+    "project_number": "168954546368",
+    "project_id": "wishlistku-561c5",
+    "storage_bucket": "wishlistku-561c5.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:369849117361:android:b93083ff9f19bef7add090",
+        "mobilesdk_app_id": "1:168954546368:android:a0f875dc306bc57970c525",
         "android_client_info": {
           "package_name": "com.example.wishlistku"
         }
       },
       "oauth_client": [
         {
-          "client_id": "369849117361-tu0o7b4843r2n6dtbtsgc08n1adt66ao.apps.googleusercontent.com",
+          "client_id": "168954546368-bi4r3hktvj77jfl7t40s1olckmpg5fu0.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.wishlistku",
-            "certificate_hash": "4e87b286cde60b500e549ad8d3fcab8a9f2803ce"
+            "certificate_hash": "b95606827258d7a419187acacf2e5485caf27ab4"
           }
         },
         {
-          "client_id": "369849117361-dj9or3vbkqs86nsp6q75c7n5qsv3engd.apps.googleusercontent.com",
+          "client_id": "168954546368-n63iev0tdni8q4dkle4gejrj276k6fc8.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBKy2gLo2NbrBRcj1STsgSse6H_91bdk7Y"
+          "current_key": "AIzaSyCOOOdZc3yZ7RzV8AAhTT3zciChxcXhbZI"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "369849117361-dj9or3vbkqs86nsp6q75c7n5qsv3engd.apps.googleusercontent.com",
+              "client_id": "168954546368-n63iev0tdni8q4dkle4gejrj276k6fc8.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

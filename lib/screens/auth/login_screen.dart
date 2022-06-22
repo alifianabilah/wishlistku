@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:get/instance_manager.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:wishlistku/database/UserDB.dart';
-import 'package:wishlistku/database/whitelistDB.dart';
+import 'package:wishlistku/database/wishlistDB.dart';
 import 'package:wishlistku/model/authentication_manager.dart';
 import 'package:wishlistku/screens/auth/login_view_model.dart';
 import 'package:wishlistku/screens/auth/register_screen.dart';
-import 'package:wishlistku/screens/whitelist/ListWhiteList.dart';
+import 'package:wishlistku/screens/wishlist/ListWishList.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -20,7 +20,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = new GlobalKey<FormState>();
   final scaffoldKey = new GlobalKey<ScaffoldState>();
-  LoginViewModel _viewModel = Get.put(LoginViewModel());
+  final LoginViewModel _viewModel = Get.put(LoginViewModel());
 
   late User dbUser;
   late String _username, _password;
@@ -90,6 +90,9 @@ class _LoginScreenState extends State<LoginScreen> {
               new Padding(
                 padding: EdgeInsets.all(dim.height * 0.02),
                 child: new TextFormField(
+                  obscureText: true,
+                  enableSuggestions: false,
+                  autocorrect: false,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter some text';
@@ -152,7 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (user != null) {
       _viewModel.loginUser(user);
-      _navigateReplace(context, const ListWhiteList());
+      _navigateReplace(context, const ListWishList());
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

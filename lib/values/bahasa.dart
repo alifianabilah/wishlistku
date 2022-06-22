@@ -21,7 +21,7 @@ class Bahasa {
   static const String lanjutkan = "Tercapai";
   static const String mengerti = "Mengerti";
 
-  static const String pesanWhitelistKosong =
+  static const String pesanWishlistKosong =
       "Cukup hati yang kosong, mimpimu jangan :)";
   static const String pesanKategoriKosong = "Kategorikan mimpimu disini\n^-^";
   static const String pilihIconTitle = "Ikon belum dipilih";
@@ -31,15 +31,17 @@ class Bahasa {
       "Sepertinya kamu belum memiliki daftar kategori, ayo kita tambah terlebih !";
   static const String ops = "Ops!";
 
-  static const String tambahWhitelist = "Tambah Wishlistku";
+  static const String tambahWishlist = "Tambah Wishlistku";
   static const String tambahKategori = "Tambah Kategori";
-  static const String updateWhitelist = "Update Wishlistku";
+  static const String updateWishlist = "Update Wishlistku";
   static const String pilihIkon = "Pilih Ikon";
   static const String wishlistku = "Wishlistku";
   static const String daftarKategori = "Daftar Kategori";
   static const String register = "Register";
   static const String login = "Login";
+  static const String logout = "Logout";
   static const String loginGoogle = "Login Google";
   static const String welcomeText = "Selamat Datang di Aplikasi Wishlistku";
   static const String fieldKosong = "Please enter some text";
+  static const String backupDb = "Export Database";
 }

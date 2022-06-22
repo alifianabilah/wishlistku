@@ -12,7 +12,15 @@ class LoginViewModel extends GetxController {
     _authManager = Get.find();
   }
 
-  Future<void> loginUser(UserAttrb user) async {
-    _authManager.login(user.id);
+  void loginUser(UserAttrb user) {
+    _authManager.login(user);
+  }
+
+  Map<String, dynamic> getData() {
+    return _authManager.getToken();
+  }
+
+  void logOut() {
+    _authManager.logOut();
   }
 }

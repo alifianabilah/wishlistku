@@ -20,6 +20,12 @@ dependencies:
   get: ^4.6.1
   google_sign_in: ^5.3.2
   http: ^0.13.4
+  google_maps_flutter: ^2.1.8
+  path_provider: ^2.0.11
+  location: ^4.4.0
+  geocode: ^1.0.1
+  google_geocoding: ^0.2.0
+  google_place: ^0.4.7
 
 dev_dependencies:
   flutter_test:
@@ -32,7 +38,7 @@ flutter:
   - assets/images/welcome.png
   - assets/images/dreamer.webp
   - assets/images/insert_kategori.webp
-  - assets/images/insert_whitelist.webp
+  - assets/images/insert_wishlist.webp
   - assets/images/loading.webp
   - assets/images/login.png
   - assets/images/register.png

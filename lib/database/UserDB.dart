@@ -21,9 +21,11 @@ class User {
   Future<UserAttrb?> login(dynamic username, dynamic password) async {
     var data = await _dbFunction.getData(
         where: "username = ? and password = ?", whereArg: [username, password]);
+
     if (data.length == 0) {
       return null;
     }
+
     return UserAttrb(data.first);
   }
 
@@ -65,8 +67,9 @@ class UserAttrb {
   dynamic get username => _data["username"];
   dynamic get password => _data["password"];
 
-  Map toMap() {
+  Map<String, dynamic> toMap() {
     return {
+      "id": id,
       "username": username,
       "password": password,
     };

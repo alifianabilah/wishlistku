@@ -8,11 +8,9 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:wishlistku/database/UserDB.dart';
 import 'package:wishlistku/screens/auth/login_screen.dart';
 import 'package:wishlistku/screens/auth/register_screen.dart';
-import 'package:wishlistku/screens/whitelist/ListWhiteList.dart';
+import 'package:wishlistku/screens/wishlist/ListWishList.dart';
 import 'package:wishlistku/values/bahasa.dart';
-import 'package:wishlistku/model/authentication_manager.dart';
 import 'package:wishlistku/screens/auth/login_view_model.dart';
-import 'package:http/http.dart' as http;
 
 final GoogleSignIn _googleSignIn = GoogleSignIn(
   scopes: [
@@ -29,9 +27,8 @@ class WelcomeScreen extends StatefulWidget {
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
   GoogleSignInAccount? _currentUser;
-  String _contactText = '';
   late User dbUser;
-  LoginViewModel _viewModel = Get.put(LoginViewModel());
+  final LoginViewModel _viewModel = Get.put(LoginViewModel());
 
   @override
   void initState() {
@@ -223,9 +220,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Future<void> _loginGoole(BuildContext context) async {
     // login google with google_sign_in
     try {
-      await _googleSignIn.signIn();
-      _loginLocal(_currentUser?.email, _currentUser?.id);
-      print(_currentUser);
+      if (_currentUser == null) {
+        await _googleSignIn.signIn();
+        await _googleSignIn.signOut();
+      }
+      _loginLocal(context, _currentUser?.email, _currentUser?.id);
     } catch (error) {
       print(error);
     }
@@ -244,18 +243,28 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     Navigator.pushReplacement(context, route);
   }
 
-  void _loginLocal(_username, _password) async {
-    UserAttrb? user = await dbUser.login(_username, _password);
+  void _loginLocal(BuildContext context, _username, _password) async {
+    try {
+      UserAttrb? user = await dbUser.login(_username, 'login_google');
 
-    if (user != null) {
-      _viewModel.loginUser(user);
-      _navigateReplace(context, const ListWhiteList());
-    } else {
-      user = await dbUser.register(username: _username, password: _password);
       if (user != null) {
         _viewModel.loginUser(user);
-        _navigateReplace(context, const ListWhiteList());
+        _navigateReplace(context, const ListWishList());
+      } else {
+        user = await dbUser.register(
+            username: _username, password: 'login_google');
+        if (user != null) {
+          _viewModel.loginUser(user);
+          _navigateReplace(context, const ListWishList());
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Register gagal!')),
+          );
+        }
       }
+    } catch (error) {
+      print(error);
+      return;
     }
   }
 }

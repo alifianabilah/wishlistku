@@ -5,12 +5,16 @@ import 'package:wishlistku/database/UserDB.dart';
 
 mixin CacheManager {
   Future<bool> saveToken(UserAttrb? token) async {
+    if (token == null) {
+      return false;
+    }
+
     final box = GetStorage();
-    await box.write(CacheManagerKey.TOKEN.toString(), token);
+    await box.write(CacheManagerKey.TOKEN.toString(), token.toMap());
     return true;
   }
 
-  UserAttrb? getToken() {
+  Map<String, dynamic> getToken() {
     final box = GetStorage();
     return box.read(CacheManagerKey.TOKEN.toString());
   }

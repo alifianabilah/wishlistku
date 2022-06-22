@@ -1,43 +1,56 @@
 // ignore_for_file: file_names, prefer_const_constructors
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:get/instance_manager.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:wishlistku/screens/auth/login_view_model.dart';
 import 'package:wishlistku/screens/kategori/kategoriScreen.dart';
+import 'package:wishlistku/screens/welcome/welcome_screen.dart';
 import 'package:wishlistku/values/bahasa.dart';
 
-import 'package:wishlistku/screens/whitelist/update_whitelist.dart';
-import 'package:wishlistku/screens/whitelist/add_whitelist.dart';
-import 'package:wishlistku/component/WhitelistItem.dart';
+import 'package:wishlistku/screens/wishlist/update_wishlist.dart';
+import 'package:wishlistku/screens/wishlist/add_wishlist.dart';
+import 'package:wishlistku/component/WishlistItem.dart';
 import 'package:wishlistku/database/kategoriDB.dart';
-import 'package:wishlistku/database/whitelistDB.dart';
+import 'package:wishlistku/database/wishlistDB.dart';
 import 'package:wishlistku/function.dart';
 
-class ListWhiteList extends StatefulWidget {
-  const ListWhiteList({Key? key}) : super(key: key);
+class ListWishList extends StatefulWidget {
+  const ListWishList({Key? key}) : super(key: key);
 
   @override
-  _ListWhiteListState createState() => _ListWhiteListState();
+  _ListWishListState createState() => _ListWishListState();
 }
 
-class _ListWhiteListState extends State<ListWhiteList> {
-  List<WhitelistAttrb> _listWhitelist = [];
-  late Whitelist dbWhitelist;
+class _ListWishListState extends State<ListWishList> {
+  List<WishlistAttrb> _listWishlist = [];
+  late Wishlist dbWishlist;
   bool ready = false;
+  final LoginViewModel _viewModel = Get.put(LoginViewModel());
 
   @override
   void initState() {
     super.initState();
-    getWhitelist();
+    getWishlist();
   }
 
   @override
   Widget build(BuildContext context) {
+    String title = Bahasa.wishlistku;
+    dynamic user = _viewModel.getData();
+    if (user != null) {
+      title = title + ", Selamat datang " + _viewModel.getData()['username'];
+    }
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Theme.of(context).primaryColor,
-        title: const Text(Bahasa.wishlistku),
+        title: Text(title),
         actions: <Widget>[
           PopupMenuButton(
             itemBuilder: (context) {
@@ -45,13 +58,26 @@ class _ListWhiteListState extends State<ListWhiteList> {
                 const PopupMenuItem(
                   child: Text(Bahasa.kategori),
                   value: 1,
-                )
+                ),
+                const PopupMenuItem(
+                  child: Text(Bahasa.backupDb),
+                  value: 2,
+                ),
+                const PopupMenuItem(
+                  child: Text(Bahasa.logout),
+                  value: 3,
+                ),
               ];
             },
             onSelected: (value) {
               if (value == 1) {
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => KategoriScreen()));
+              } else if (value == 2) {
+                backupDb(context);
+              } else if (value == 3) {
+                _viewModel.logOut();
+                _navigateReplace(context, const WelcomeScreen());
               }
             },
           )
@@ -60,8 +86,8 @@ class _ListWhiteListState extends State<ListWhiteList> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: customFlatActionButton(context),
       body: RefreshIndicator(
-        onRefresh: () => getWhitelist(),
-        child: _listWhitelist.isEmpty
+        onRefresh: () => getWishlist(),
+        child: _listWishlist.isEmpty
             ? !ready
                 ? Container()
                 : ListView(
@@ -72,7 +98,7 @@ class _ListWhiteListState extends State<ListWhiteList> {
                         width: 200.0,
                       ),
                       Text(
-                        Bahasa.pesanWhitelistKosong,
+                        Bahasa.pesanWishlistKosong,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             color: Theme.of(context).primaryColor,
@@ -87,12 +113,12 @@ class _ListWhiteListState extends State<ListWhiteList> {
                     onDismissed: (direction) => hapusItem(index),
                     confirmDismiss: (direction) =>
                         dismissAction(direction, index),
-                    direction: _listWhitelist[index].status == 0
+                    direction: _listWishlist[index].status == 0
                         ? DismissDirection.horizontal
                         : DismissDirection.endToStart,
-                    child: WhitelistItem(
-                      onTap: () => itemClick(_listWhitelist[index], index),
-                      whitelistAttrb: _listWhitelist[index],
+                    child: WishlistItem(
+                      onTap: () => itemClick(_listWishlist[index], index),
+                      wishlistAttrb: _listWishlist[index],
                       key: UniqueKey(),
                     ),
                     secondaryBackground: MyFunction.bgHapus(),
@@ -100,7 +126,7 @@ class _ListWhiteListState extends State<ListWhiteList> {
                     key: UniqueKey(),
                   );
                 },
-                itemCount: _listWhitelist.length,
+                itemCount: _listWishlist.length,
               ),
       ),
     );
@@ -131,15 +157,15 @@ class _ListWhiteListState extends State<ListWhiteList> {
   }
 
   Future<void> hapusItem(index) async {
-    await dbWhitelist.deleteData(_listWhitelist[index].id);
-    _listWhitelist.removeAt(index);
+    await dbWishlist.deleteData(_listWishlist[index].id);
+    _listWishlist.removeAt(index);
     setState(() {});
   }
 
-  void itemClick(WhitelistAttrb whitelistAttrb, index) async {
+  void itemClick(WishlistAttrb wishlistAttrb, index) async {
     Kategori kategori = await Kategori.initDatabase();
     KategoriAttrb? kategoriAttrb =
-        await kategori.getById(whitelistAttrb.idKategori);
+        await kategori.getById(wishlistAttrb.idKategori);
 
     IconData iconData =
         kategoriAttrb != null ? kategoriAttrb.icon : Icons.warning;
@@ -154,21 +180,21 @@ class _ListWhiteListState extends State<ListWhiteList> {
                 Container(
                     padding: EdgeInsets.all(20.0),
                     decoration: BoxDecoration(
-                        color: whitelistAttrb.status == 0
+                        color: wishlistAttrb.status == 0
                             ? Theme.of(context).primaryColor
                             : Theme.of(context).colorScheme.secondary,
                         shape: BoxShape.circle),
                     child: Icon(
                       iconData,
                       size: 80.0,
-                      color: whitelistAttrb.status == 0
+                      color: wishlistAttrb.status == 0
                           ? Colors.white
                           : Theme.of(context).primaryColor,
                     )),
                 SizedBox(
                   height: 5.0,
                 ),
-                Text(whitelistAttrb.title,
+                Text(wishlistAttrb.title,
                     style: TextStyle(
                       fontSize: 20.0,
                       color: Theme.of(context).primaryColor,
@@ -176,11 +202,11 @@ class _ListWhiteListState extends State<ListWhiteList> {
                     )),
                 Text(
                     DateFormat(DateFormat.YEAR_MONTH_DAY)
-                        .format(whitelistAttrb.time),
+                        .format(wishlistAttrb.time),
                     style: TextStyle(
                         fontSize: 12.0, fontWeight: FontWeight.normal)),
                 Divider(),
-                Text(whitelistAttrb.description,
+                Text(wishlistAttrb.description,
                     style: TextStyle(
                         fontSize: 18.0, fontWeight: FontWeight.normal)),
                 SizedBox(
@@ -189,14 +215,14 @@ class _ListWhiteListState extends State<ListWhiteList> {
                 Text(
                     "Rp" +
                         NumberFormat("#,###")
-                            .format(int.tryParse(whitelistAttrb.price) ?? 0)
+                            .format(int.tryParse(wishlistAttrb.price) ?? 0)
                             .replaceAll(",", "."),
                     style: TextStyle(
                         fontWeight: FontWeight.normal, fontSize: 25.0))
               ],
             ),
             actions: <Widget>[
-              whitelistAttrb.status == 0
+              wishlistAttrb.status == 0
                   ? CupertinoButton(
                       child: Text(
                         Bahasa.tercapai,
@@ -211,7 +237,7 @@ class _ListWhiteListState extends State<ListWhiteList> {
                       },
                     )
                   : Container(),
-              whitelistAttrb.status == 0
+              wishlistAttrb.status == 0
                   ? CupertinoButton(
                       child: Text(
                         Bahasa.ubah,
@@ -219,7 +245,7 @@ class _ListWhiteListState extends State<ListWhiteList> {
                       ),
                       borderRadius: BorderRadius.circular(10.0),
                       onPressed: () async {
-                        await updateItem(context, _listWhitelist[index]);
+                        await updateItem(context, _listWishlist[index]);
                         setState(() {});
                       },
                     )
@@ -298,11 +324,11 @@ class _ListWhiteListState extends State<ListWhiteList> {
                   style: TextStyle(color: Colors.green),
                 ),
                 onPressed: () async {
-                  await dbWhitelist
-                      .updateData(_listWhitelist[index].id, {"status": "1"});
+                  await dbWishlist
+                      .updateData(_listWishlist[index].id, {"status": "1"});
                   Navigator.pop(context, true);
                   setState(() {});
-                  getWhitelist();
+                  getWishlist();
                 },
               ),
               CupertinoButton(
@@ -318,31 +344,71 @@ class _ListWhiteListState extends State<ListWhiteList> {
   }
 
   Future<dynamic> addItem(BuildContext context) async {
-    WhitelistAttrb newItem =
+    WishlistAttrb newItem =
         await Navigator.push(context, MaterialPageRoute(builder: (context) {
-      return AddWhiteListScreen();
+      return AddWishListScreen();
     }));
-    _listWhitelist.add(newItem);
-    getWhitelist();
+    _listWishlist.add(newItem);
+    getWishlist();
   }
 
-  Future<dynamic> updateItem(BuildContext context, WhitelistAttrb item) async {
+  Future<dynamic> updateItem(BuildContext context, WishlistAttrb item) async {
     await Navigator.push(context, MaterialPageRoute(builder: (context) {
-      return UpdateWhiteListScreen(item: item);
+      return UpdateWishListScreen(item: item);
     }));
 
     Navigator.pop(context);
-    getWhitelist();
+    getWishlist();
   }
 
-  Future<void> getWhitelist() async {
+  Future<void> getWishlist() async {
     ready = false;
     setState(() {
-      _listWhitelist.clear();
+      _listWishlist.clear();
     });
-    dbWhitelist = await Whitelist.initDatabase();
-    _listWhitelist = await dbWhitelist.getData();
+    dbWishlist = await Wishlist.initDatabase();
+
+    dynamic user = _viewModel.getData();
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Anda belum login"),
+        duration: Duration(seconds: 2),
+      ));
+      return;
+    }
+    _listWishlist = await dbWishlist.getByUserID(user['id'].toString());
     ready = true;
     if (mounted) setState(() {});
+  }
+
+  _write(BuildContext context, String text) async {
+    Directory? directory = await getExternalStorageDirectory();
+    if (directory == null) {
+      // widget pop up dialog
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Gagal mengekspor data")),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+          content: Text(
+              "Berhasil mengekspor data, file di ${directory.path}/wishlist_database.sqlite")),
+    );
+
+    final File file = File('${directory.path}/wishlist_database.sqlite');
+    await file.writeAsString(text);
+  }
+
+  Future<void> backupDb(BuildContext context) async {
+    dbWishlist = await Wishlist.initDatabase();
+    String backup = await dbWishlist.generateBackup();
+    await _write(context, backup);
+  }
+
+  void _navigateReplace(BuildContext context, Widget widget) {
+    Route route = MaterialPageRoute(builder: (context) => widget);
+    Navigator.pushReplacement(context, route);
   }
 }

@@ -3,21 +3,21 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:wishlistku/database/kategoriDB.dart';
-import 'package:wishlistku/database/whitelistDB.dart';
+import 'package:wishlistku/database/wishlistDB.dart';
 
-class WhitelistItem extends StatefulWidget {
+class WishlistItem extends StatefulWidget {
   final Function() onTap;
-  final WhitelistAttrb whitelistAttrb;
+  final WishlistAttrb wishlistAttrb;
 
-  const WhitelistItem(
-      {required Key key, required this.onTap, required this.whitelistAttrb})
+  const WishlistItem(
+      {required Key key, required this.onTap, required this.wishlistAttrb})
       : super(key: key);
 
   @override
-  _WhitelistItemState createState() => _WhitelistItemState();
+  _WishlistItemState createState() => _WishlistItemState();
 }
 
-class _WhitelistItemState extends State<WhitelistItem> {
+class _WishlistItemState extends State<WishlistItem> {
   IconData? iconData;
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class _WhitelistItemState extends State<WhitelistItem> {
         child: iconData != null
             ? Icon(
                 iconData,
-                color: widget.whitelistAttrb.status == 0
+                color: widget.wishlistAttrb.status == 0
                     ? Colors.white
                     : Theme.of(context).colorScheme.secondary,
               )
@@ -49,7 +49,7 @@ class _WhitelistItemState extends State<WhitelistItem> {
           Text(
             "Rp" +
                 NumberFormat("#,###")
-                    .format(double.parse(widget.whitelistAttrb.price))
+                    .format(double.parse(widget.wishlistAttrb.price))
                     .replaceAll(",", "."),
             style: TextStyle(fontSize: 18.0),
           )
@@ -59,26 +59,26 @@ class _WhitelistItemState extends State<WhitelistItem> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          Text(widget.whitelistAttrb.title),
+          Text(widget.wishlistAttrb.title),
           SizedBox(
             width: 3,
           ),
           Text(
             DateFormat(DateFormat.YEAR_MONTH_DAY)
-                .format(widget.whitelistAttrb.time),
+                .format(widget.wishlistAttrb.time),
             style: TextStyle(
-                color: widget.whitelistAttrb.status == 1
+                color: widget.wishlistAttrb.status == 1
                     ? Colors.green
-                    : !DateTime.now().isAfter(widget.whitelistAttrb.time)
+                    : !DateTime.now().isAfter(widget.wishlistAttrb.time)
                         ? Colors.grey[600]
                         : Colors.red,
                 fontSize: 10.0),
           ),
         ],
       ),
-      subtitle: widget.whitelistAttrb.description != null
+      subtitle: widget.wishlistAttrb.description != null
           ? Text(
-              widget.whitelistAttrb.description,
+              widget.wishlistAttrb.description,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             )
@@ -95,7 +95,7 @@ class _WhitelistItemState extends State<WhitelistItem> {
   void initIconData() async {
     Kategori kategori = await Kategori.initDatabase();
     KategoriAttrb? kategoriAttrb =
-        await kategori.getById(widget.whitelistAttrb.idKategori);
+        await kategori.getById(widget.wishlistAttrb.idKategori);
     iconData = kategoriAttrb != null ? kategoriAttrb.icon : Icons.warning;
     if (mounted) setState(() {});
   }
